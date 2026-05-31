@@ -1,5 +1,3 @@
-# Portafolio de Seguridad Informática — Jamir Marez
-
 Soy profesional de infraestructura IT con más de 10 años de experiencia en entornos Windows Server,
 en transición hacia roles de Security Operations (SOC). Este repositorio documenta proyectos
 prácticos de seguridad construidos en un homelab propio.
