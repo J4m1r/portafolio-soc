@@ -15,10 +15,8 @@ prácticos de seguridad construidos en un homelab propio.
 
 | # | Proyecto | Descripción |
 |---|----------|-------------|
-| 01 | [Homelab Infrastructure](./01-homelab-infra/) | Virtualización con Proxmox, red segmentada y
-servicios desplegados |
-| 02 | [SIEM con Wazuh](./02-siem-wazuh/) | Despliegue y configuración de Wazuh como solución SIEM en
-entorno de laboratorio |
+| 01 | [Homelab Infrastructure](./01-homelab-infra/) | Virtualización con Proxmox, red segmentada y servicios desplegados |
+| 02 | [SIEM con Wazuh](./02-siem-wazuh/) | Despliegue y configuración de Wazuh como solución SIEM en entorno de laboratorio |
 
 ## Contacto
 
