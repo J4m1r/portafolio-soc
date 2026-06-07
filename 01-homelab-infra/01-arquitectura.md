@@ -1,0 +1,67 @@
+# 01 — Arquitectura del Lab
+
+## Visión general
+
+El lab está compuesto por dos hosts físicos en la misma red local. singularity
+corre Proxmox VE y aloja los servicios Linux. CHECO corre Windows 11 con
+VirtualBox para el lab de Active Directory y WSL2 para IA local.
+
+## Diagrama de red
+
+```
+                    LAN — 192.168.1.0/24
+    ┌──────────────────────────────────────────────────────────┐
+    │                                                          │
+    │  ┌──────────────────────────┐  ┌──────────────────────┐  │
+    │  │  singularity             │  │  CHECO               │  │
+    │  │  Proxmox VE              │  │  Windows 11 Pro      │  │
+    │  │  192.168.1.230           │  │  192.168.1.2         │  │
+    │  │                          │  │                      │  │
+    │  │  ┌────────────────────┐  │  │  ┌────────────────┐  │  │
+    │  │  │ cosmos             │  │  │  │ syvdc          │  │  │
+    │  │  │ 192.168.1.63       │  │  │  │ 192.168.1.110  │  │  │
+    │  │  └────────────────────┘  │  │  └────────────────┘  │  │
+    │  │  ┌────────────────────┐  │  │  ┌────────────────┐  │  │
+    │  │  │ sentinel           │  │  │  │ syvpc01        │  │  │
+    │  │  │ 192.168.1.66       │  │  │  │ 192.168.1.70   │  │  │
+    │  │  └────────────────────┘  │  │  └────────────────┘  │  │
+    │  │                          │  │  ┌────────────────┐  │  │
+    │  │                          │  │  │ WSL2 + Ollama  │  │  │
+    │  │                          │  │  │ (NAT interno)  │  │  │
+    │  └──────────────────────────┘  │  └────────────────┘  │  │
+    │                                └──────────────────────┘  │
+    └──────────────────────────────────────────────────────────┘
+```
+
+## Hardware
+
+### singularity — Proxmox VE
+
+| Recurso | Detalle |
+|---|---|
+| CPU | Intel Core i7-1165G7 @ 2.80GHz — 4 cores / 8 threads |
+| RAM | 15 GB |
+| Disco principal | NVMe WD SN740 512 GB |
+| Disco backup | HDD Seagate 500 GB — montado en `/mnt/backup` |
+| IP | 192.168.1.230 |
+
+### CHECO — VirtualBox + WSL2
+
+| Recurso | Detalle |
+|---|---|
+| CPU | Intel Core i5-10400 @ 2.90GHz — 6 cores / 12 threads |
+| RAM | 32 GB |
+| GPU | Nvidia 6 GB VRAM |
+| SO | Windows 11 Pro |
+| IP | 192.168.1.2 |
+| Hipervisor | VirtualBox — VMs en D:\SERVIDORES\ |
+
+## Inventario de VMs
+
+| VM | Host | SO | RAM | IP | Propósito |
+|---|---|---|---|---|---|
+| cosmos | singularity | Ubuntu 24.04 | 4 GB | 192.168.1.63 | Servidor web nginx |
+| sentinel | singularity | Ubuntu 24.04 | 4 GB | 192.168.1.66 | SIEM — Wazuh |
+| syvdc | CHECO | Windows Server 2022 | 8 GB | 192.168.1.110 | Domain Controller |
+| syvpc01 | CHECO | Windows 10 64-bit | 4 GB | 192.168.1.70 | Cliente AD |
+| WSL2 + Ollama | CHECO | Ubuntu (WSL2) | dinámica | NAT interno | LLM para análisis de logs |
