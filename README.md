@@ -19,4 +19,4 @@ prácticos de seguridad construidos en un homelab propio.
 ## Contacto
 
 - GitHub: [J4m1r](https://github.com/J4m1r)
-- LinkedIn: *(próximamente)*
+- LinkedIn: [jmarez](https://www.linkedin.com/in/jmarez/)
