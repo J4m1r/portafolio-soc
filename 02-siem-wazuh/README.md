@@ -29,7 +29,7 @@ plataformas mixtas (Windows y Linux) y el análisis de alertas en tiempo real.
 | [02-instalacion.md](02-instalacion.md) | Proceso de instalación y problemas resueltos |
 | [03-agentes.md](03-agentes.md) | Configuración de agentes Windows y Linux |
 | [04-alertas-y-reglas.md](04-alertas-y-reglas.md) | Alertas observadas, niveles de severidad y análisis |
-| [05-scripts.md](05-scripts.md) | Scripts usados para gestión y monitoreo |
+| [05-integracion-ollama.md](05-integracion-ollama.md) | Integración Wazuh → Ollama para análisis de alertas con IA local |
 
 ## Estado
 
