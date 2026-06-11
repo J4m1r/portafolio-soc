@@ -87,7 +87,7 @@ systemctl restart wazuh-manager
 import sys
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 
 OLLAMA_URL = "http://192.168.1.2:11434/api/generate"
 MODEL = "deepseek-r1:7b"
@@ -95,9 +95,9 @@ LOG_FILE = "/var/ossec/logs/ollama-analysis.log"
 
 def analyze_alert(alert):
     prompt = f"""Eres un analista SOC. Analiza esta alerta de Wazuh y responde en español:
-1. ¿Qué ocurrió?
-2. ¿Es crítico? ¿Por qué?
-3. Acción recomendada
+1. Que ocurrio?
+2. Es critico? Por que?
+3. Accion recomendada
 
 Alerta:
 {json.dumps(alert, indent=2, ensure_ascii=False)}"""
@@ -105,10 +105,18 @@ Alerta:
     response = requests.post(OLLAMA_URL, json={
         "model": MODEL,
         "prompt": prompt,
-        "stream": False
-    }, timeout=120)
+        "stream": True
+    }, stream=True, timeout=120)
 
-    return response.json().get("response", "Sin respuesta")
+    full_response = ""
+    for line in response.iter_lines():
+        if line:
+            chunk = json.loads(line.decode("utf-8"))
+            full_response += chunk.get("response", "")
+            if chunk.get("done", False):
+                break
+
+    return full_response
 
 def main():
     alert_file = sys.argv[1]
@@ -118,11 +126,12 @@ def main():
     analysis = analyze_alert(alert)
 
     entry = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "alert_id": alert.get("id", "unknown"),
-        "rule": alert.get("rule", {}),
-        "agent": alert.get("agent", {}),
-        "analysis": analysis
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "orig_alert_id": alert.get("id", "unknown"),
+        "orig_rule_id": alert.get("rule", {}).get("id", ""),
+        "orig_rule_desc": alert.get("rule", {}).get("description", ""),
+        "orig_agent": alert.get("agent", {}).get("name", ""),
+        "ai_analysis": analysis.replace("\n", " ").strip()
     }
 
     with open(LOG_FILE, "a") as f:
@@ -195,22 +204,16 @@ cat /var/ossec/logs/ollama-analysis.log
 
 ---
 
-## Ejemplo de salida
+## Ejemplo de salida real
 
 ```json
 {
-  "timestamp": "2026-06-09T00:04:27.254618",
-  "alert_id": "test-001",
-  "rule": {
-    "id": "5710",
-    "level": 7,
-    "description": "SSH brute force"
-  },
-  "agent": {
-    "id": "001",
-    "name": "syvdc"
-  },
-  "analysis": "Se detectó un ataque de fuerza bruta SSH sobre el usuario root desde 192.168.1.99. Es crítico porque root tiene los privilegios más elevados del sistema. Acción recomendada: bloquear la IP origen y revisar logs de autenticación."
+  "timestamp": "2026-06-10T06:20:36.142481+00:00",
+  "orig_alert_id": "1781071725.394803",
+  "orig_rule_id": "2904",
+  "orig_rule_desc": "Dpkg (Debian Package) half configured.",
+  "orig_agent": "cosmos",
+  "ai_analysis": "1. Qué ocurrió? En el timestamp del 10 de junio de 2026 a las 6:08 AM, se registró una alerta relacionada con el paquete Dpkg que se encontraba en estado semiconfigurado. 2. Es crítico? Sí, nivel 7. Un estado half-configured puede afectar la estabilidad del sistema y el manejo de dependencias. 3. Acción recomendada: revisar /var/log/dpkg.log y ejecutar apt --fix-broken install para resolver las configuraciones pendientes."
 }
 ```
 
